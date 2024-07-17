@@ -35,7 +35,9 @@ public class DialogueManager : MonoBehaviour
 
     public void LoadDialogueData()
     {
-        string filePath = Path.Combine(Application.dataPath, "JSONs/dialogue.json");
+        
+        string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Assets/JSONs/dialogue.json");
+        print(filePath);
         if (File.Exists(filePath))
         {
             string dataAsJson = File.ReadAllText(filePath);

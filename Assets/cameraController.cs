@@ -8,22 +8,19 @@ public class cameraController : MonoBehaviour
 {
     public Transform playerTransform;
     public GameObject player;
-    private Vector3 offset;
-    private Vector3 dialogOffset;
+    public Vector3 offset;
 
-
-    private Vector3 angleOffset;
-    private Vector3 dialogueAngleOffset;
     public float followSpeed = 10f;
-    
+    public float turnSpeed = 4.0f;
 
-    public Transform closeUpPosition; // The close-up camera position near the player and NPC
-    public Transform normalPosition; // The close-up camera position near the player and NPC
 
-    public float transitionSpeed = 2f; // Speed of camera transition
-    public GameObject dialogueBox; // Reference to the dialogue box
+    public Transform closeUpPosition;
+    public Transform normalPosition;
 
-    public bool isDialogueActive = false; // State of the dialogue box
+    public float transitionSpeed = 2f;
+    public GameObject dialogueBox;
+
+    public bool isDialogueActive = false;
 
 
     void Start()
@@ -37,9 +34,7 @@ public class cameraController : MonoBehaviour
             return;
         }
 
-        // Calculate the initial offset
-        offset = normalPosition.position - playerTransform.position;
-        dialogOffset = closeUpPosition.position - playerTransform.position;
+        offset = new Vector3(5, 1.5f, -3);
 
     }
 
@@ -71,12 +66,18 @@ public class cameraController : MonoBehaviour
 
         if (playerTransform != null && !isDialogueActive)
         {
-            Vector3 targetPosition = playerTransform.position + offset;
+            
+            transform.position = playerTransform.position + offset;
+            transform.LookAt(playerTransform.position);
+            if (Input.GetMouseButton(1))
+            {
+                offset = Quaternion.AngleAxis(Input.GetAxis("Mouse X") * turnSpeed, Vector3.up) * offset;
+                
+            }
+            else
+            {
 
-
-            transform.position = Vector3.Lerp(transform.position, targetPosition, followSpeed * Time.deltaTime);
-            //transform.rotation = Quaternion.Lerp(gameObject.transform.rotation, normalPosition.transform.rotation, followSpeed * Time.deltaTime);
-            transform.eulerAngles = normalPosition.transform.eulerAngles;
+            }
 
         }
         else if (isDialogueActive)

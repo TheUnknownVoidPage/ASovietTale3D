@@ -10,11 +10,12 @@ public class npcController : MonoBehaviour
     public Transform player;
     public Transform npcHead;
     Quaternion originalHeadPos;
+    Quaternion originalPos;
     private float rotationSpeed = 5f;
 
     public GameObject dialogueManagerPrefab;
     GameObject dialogueManager;
-    public float interactionDistance = 1.5f;
+    public float interactionDistance = 0.5f;
     private bool chatBoxOpen = false;
 
     public string characterName;
@@ -26,8 +27,11 @@ public class npcController : MonoBehaviour
     void Start()
     {
         originalHeadPos = npcHead.transform.rotation;
+        originalPos = transform.rotation;
         dialogueManager = Instantiate(dialogueManagerPrefab);
         dialogueManager.SetActive(false);
+
+
     }
 
     // Update is called once per frame
@@ -48,8 +52,9 @@ public class npcController : MonoBehaviour
 
         if (distanceToPlayer < 5f)
         {
-            // Calculate the direction to the player on the XZ plane
-            Vector3 directionOnXZ = new Vector3(directionToPlayer.x, 0, directionToPlayer.z);
+
+                // Calculate the direction to the player on the XZ plane
+                Vector3 directionOnXZ = new Vector3(directionToPlayer.x, 0, directionToPlayer.z);
             // Calculate the target rotation based on the direction
             Quaternion targetRotation = Quaternion.LookRotation(directionOnXZ);
 
@@ -57,15 +62,29 @@ public class npcController : MonoBehaviour
             float angleDifference = Quaternion.Angle(originalHeadPos, targetRotation);
             //print("Angle Difference:" + angleDifference);
             // Check if the angle difference is within the limit
-            if (angleDifference <= 70f)
+            if (angleDifference <= 70f && !chatBoxOpen)
             {
                 // Smoothly rotate the head towards the player on the Y axis
                 npcHead.transform.rotation = Quaternion.Slerp(npcHead.transform.rotation, targetRotation, Time.deltaTime * rotationSpeed);
             }
+            else if(chatBoxOpen)
+            {
+                npcHead.transform.rotation = Quaternion.Slerp(npcHead.transform.rotation, targetRotation, Time.deltaTime * rotationSpeed);
+            }
+            
             else
             {
 
                 npcHead.transform.rotation = Quaternion.Slerp(npcHead.transform.rotation, originalHeadPos, Time.deltaTime * rotationSpeed);
+            }
+            if (chatBoxOpen)
+            {
+
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * rotationSpeed);
+            }
+            else
+            {
+                transform.rotation = Quaternion.Slerp(transform.rotation, originalPos, Time.deltaTime * rotationSpeed);
             }
         }
     }
@@ -91,6 +110,7 @@ public class npcController : MonoBehaviour
                 {
                     if (chatBoxOpen)
                     {
+
                         if (dialogueManager.GetComponent<DialogueManager>().isTyping == true)
                         {
                             dialogueManager.GetComponent<DialogueManager>().ShowFullText();

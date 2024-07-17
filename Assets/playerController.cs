@@ -9,22 +9,25 @@ public class playerController : MonoBehaviour
     public float moveSpeed = 5f; // Speed of the player movement
     public float rotationSpeed = 720f; // Speed of the player rotation
 
+
+    private CharacterController characterController;
+    public Transform cameraTransform;
+
     public GameObject interactingNPC;
 
     private Vector3 moveDirection;
+    Vector3 desiredMoveDirection;
 
     private void Start()
     {
         animator = GetComponent<Animator>();
+        characterController = GetComponent<CharacterController>();
     }
     void Update()
     {
-        if (interactingNPC != null)
-        {
-            print(interactingNPC.name);
-        }
-        
-        
+
+
+
 
         HandleMovement();
         HandleRotation();
@@ -42,27 +45,30 @@ public class playerController : MonoBehaviour
         if (moveDirection != Vector3.zero)
         {
             animator.SetBool("movement", true);
-            
+
         }
         else
         {
             animator.SetBool("movement", false);
         }
-        if (moveX != 0 && moveZ != 0)
-        {
-            transform.position += moveDirection.normalized * moveSpeed * Time.deltaTime;
-        }
-        else
-        {
-            transform.position += moveDirection * moveSpeed * Time.deltaTime;
-        }
-        
+        Vector3 forward = cameraTransform.forward;
+        Vector3 right = cameraTransform.right;
+
+        forward.y = 0f;
+        right.y = 0f;
+
+        forward.Normalize();
+        right.Normalize();
+
+        desiredMoveDirection = forward * Input.GetAxis("Vertical") + right * Input.GetAxis("Horizontal");
+
+        characterController.SimpleMove(desiredMoveDirection * moveSpeed);
     }
     void HandleRotation()
     {
         if (moveDirection != Vector3.zero)
         {
-            Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
+            Quaternion targetRotation = Quaternion.LookRotation(desiredMoveDirection);
             transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
         }
     }

@@ -6,37 +6,106 @@ public class playerController : MonoBehaviour
 {
 
     Animator animator;
+
     public float moveSpeed = 5f; // Speed of the player movement
     public float rotationSpeed = 720f; // Speed of the player rotation
+    private float gravity = 9.81f;
+
+    private float verticalVelocity;
+
+    public bool isLocked;
 
 
-    private Rigidbody rb;
+    [SerializeField] private Transform camera;
+    [SerializeField] private float turningSpeed = 200f;
     private CharacterController characterController;
-    public Transform cameraTransform;
+    //public Transform cameraTransform;
 
     public GameObject interactingNPC;
 
     private Vector3 moveDirection;
-    Vector3 desiredMoveDirection;
+
+
+
+    private float moveInput;
+    private float turnInput;
+
+
+    
+
+
 
     private void Start()
     {
+        isLocked = false;
         animator = GetComponent<Animator>();
         characterController = GetComponent<CharacterController>();
-        rb = GetComponent<Rigidbody>();
-        rb.freezeRotation = true;
+
     }
     void Update()
     {
+        if (!isLocked)
+        {
+            InputManagement();
+            Movement();
+            HandleAnimation();
+        }
 
+    }
+    private void Movement()
+    {
+        GroundMovement();
+        Turn();
+    }
+    private void GroundMovement()
+    {
+        Vector3 move = new Vector3(turnInput, 0, moveInput);
+        move = camera.transform.TransformDirection(move);
 
+        move *= moveSpeed;
 
-
-        HandleMovement();
-        HandleRotation();
+        move.y = VerticalForceCalculation();
+        
+        characterController.Move(move * Time.deltaTime);
     }
 
-    void HandleMovement()
+    private void Turn()
+    {
+        if (Mathf.Abs(turnInput) > 0 || Mathf.Abs(moveInput) > 0)
+        {
+            // Calculate the movement direction based on input and the camera's forward direction
+            Vector3 targetDirection = new Vector3(turnInput, 0, moveInput);
+            targetDirection = camera.transform.TransformDirection(targetDirection);
+            targetDirection.y = 0;  // Ensure no vertical movement
+
+            // If the direction is significant, rotate the player towards it
+            if (targetDirection.sqrMagnitude > 0.01f)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(targetDirection);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * turningSpeed);
+            }
+        }
+    }
+
+    private float VerticalForceCalculation()
+    {
+        if(characterController.isGrounded)
+        {
+            verticalVelocity = -1f;
+        }
+        else
+        {
+            verticalVelocity -= gravity * Time.deltaTime;
+        }
+        return verticalVelocity;
+    }
+
+    private void InputManagement()
+    {
+        moveInput = Input.GetAxis("Vertical");
+        turnInput = Input.GetAxis("Horizontal");
+    }
+    void HandleAnimation()
     {
         float moveX = Input.GetAxisRaw("Horizontal");
         float moveZ = Input.GetAxisRaw("Vertical");
@@ -56,27 +125,8 @@ public class playerController : MonoBehaviour
         {
             animator.SetBool("movement", false);
         }
-        Vector3 forward = cameraTransform.forward;
-        Vector3 right = cameraTransform.right;
 
-        forward.y = 0f;
-        right.y = 0f;
-
-        forward.Normalize();
-        right.Normalize();
-
-        desiredMoveDirection = forward * Input.GetAxis("Vertical") + right * Input.GetAxis("Horizontal");
-
-        Vector3 force = desiredMoveDirection * moveSpeed;
-        rb.AddForce(force, ForceMode.VelocityChange);
-    }
-    void HandleRotation()
-    {
-        if (moveDirection != Vector3.zero)
-        {
-            Quaternion targetRotation = Quaternion.LookRotation(desiredMoveDirection);
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-        }
+    
     }
 
     public void SetInteractingNPC(GameObject gameObject)

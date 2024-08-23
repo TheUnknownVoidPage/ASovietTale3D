@@ -93,7 +93,7 @@ public class npcController : MonoBehaviour
         float horizontal = Input.GetAxis("Horizontal");
         float vertical = Input.GetAxis("Vertical");
 
-        if ((Vector3.Distance(transform.position, player.position) <= interactionDistance) && (horizontal == 0 && vertical == 0))
+        if ((Vector3.Distance(transform.position, player.position) <= interactionDistance))// && (horizontal == 0 && vertical == 0))
         {
             // Check if the 'E' key is pressed
             if (Input.GetKeyDown(KeyCode.E))

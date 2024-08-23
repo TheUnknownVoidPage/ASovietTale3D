@@ -10,6 +10,7 @@ public class playerController : MonoBehaviour
     public float rotationSpeed = 720f; // Speed of the player rotation
 
 
+    private Rigidbody rb;
     private CharacterController characterController;
     public Transform cameraTransform;
 
@@ -22,6 +23,8 @@ public class playerController : MonoBehaviour
     {
         animator = GetComponent<Animator>();
         characterController = GetComponent<CharacterController>();
+        rb = GetComponent<Rigidbody>();
+        rb.freezeRotation = true;
     }
     void Update()
     {
@@ -35,12 +38,14 @@ public class playerController : MonoBehaviour
 
     void HandleMovement()
     {
-        float moveX = Input.GetAxis("Horizontal");
-        float moveZ = Input.GetAxis("Vertical");
+        float moveX = Input.GetAxisRaw("Horizontal");
+        float moveZ = Input.GetAxisRaw("Vertical");
 
 
 
         moveDirection = new Vector3(moveX, 0f, moveZ);
+
+        print(moveDirection);
 
         if (moveDirection != Vector3.zero)
         {
@@ -62,7 +67,8 @@ public class playerController : MonoBehaviour
 
         desiredMoveDirection = forward * Input.GetAxis("Vertical") + right * Input.GetAxis("Horizontal");
 
-        characterController.SimpleMove(desiredMoveDirection * moveSpeed);
+        Vector3 force = desiredMoveDirection * moveSpeed;
+        rb.AddForce(force, ForceMode.VelocityChange);
     }
     void HandleRotation()
     {

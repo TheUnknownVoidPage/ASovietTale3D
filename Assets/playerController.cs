@@ -114,7 +114,7 @@ public class playerController : MonoBehaviour
 
         moveDirection = new Vector3(moveX, 0f, moveZ);
 
-        print(moveDirection);
+
 
         if (moveDirection != Vector3.zero)
         {

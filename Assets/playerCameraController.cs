@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
 using static UnityEngine.Cursor;
+using Cinemachine;
 
 public class cameraController : MonoBehaviour
 {
-
+    public CinemachineTargetGroup ctg;
 
  
     public GameObject player;
@@ -25,7 +26,7 @@ public class cameraController : MonoBehaviour
     void Start()
     {
         player = this.gameObject;
-
+        ctg.AddMember(gameObject.transform, 1, 1f);
     }
 
     void LateUpdate()
@@ -70,14 +71,32 @@ public class cameraController : MonoBehaviour
             //transform.LookAt(player.transform.position);
             //transform.position = new Vector3(transform.position.x, transform.position.y + 5, transform.position.z);
 
+            if (npc != null)
+            {
+                if ((ctg.FindMember(npc.transform) != 0) && (npc.transform != null)) ctg.RemoveMember(npc.transform);
+            }
+
+            
+
+            
+
             mainCamera.SetActive(true);
             dialogueCamera.SetActive(false);
             player.GetComponent<playerController>().isLocked = false;
 
 
+            
+
         }
         else if (isDialogueActive)
         {
+            npc = player.GetComponent<playerController>().interactingNPC;
+
+
+            if (ctg.FindMember(npc.transform) == -1) ctg.AddMember(npc.transform, 1, 2f);
+
+
+
             //Vector3 headToTransform = closeUpPosition.position - player.GetComponent<playerController>().interactingNPC.transform.position;
             //Vector3 adjustedCloseUpPosition = player.GetComponent<playerController>().interactingNPC.transform.position + headToTransform;
 
